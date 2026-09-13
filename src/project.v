@@ -29,7 +29,7 @@ module tt_um_example (
             count <= count + 1;
     end
 
-    assign uo_out = uio_in[1] ? count : 8'bz;
+    assign uo_out = count;
 
   // All output pins must be assigned. If not used, assign to 0.
   // assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
