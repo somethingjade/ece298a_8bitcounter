@@ -29,7 +29,7 @@ module tt_um_example (
             count <= count + 1;
     end
 
-    assign uo_out = count;
+    assign uo_out = uio_in[1] ? count : 8'bz;
 
   // All output pins must be assigned. If not used, assign to 0.
   // assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
@@ -37,6 +37,6 @@ module tt_um_example (
   assign uio_oe  = 0;
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+    wire _unused = &{ena, uio_in[7:2], 1'b0};
 
 endmodule
