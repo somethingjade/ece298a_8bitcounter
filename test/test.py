@@ -3,7 +3,7 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
+from cocotb.triggers import ClockCycles, ReadOnly, NextTimeStep
 
 
 @cocotb.test()
@@ -27,16 +27,41 @@ async def test_project(dut):
 
     # Set the input values you want to test
     dut.ui_in.value = 20
-    dut.uio_in.value = 0b11111111
+    dut.uio_in.value = 0b00000011
     
     # Wait for one clock cycle to see the output values
     await ClockCycles(dut.clk, 1)
-
-    dut._log.info(f"actual value: {dut.uo_out.value.integer}")
+    await ReadOnly()
 
     # The following assersion is just an example of how to check the output values.
     # Change it to match the actual expected output of your module:
+    assert dut.uo_out.value == 20
+    await NextTimeStep()
+
+    dut.uio_in.value = 0b00000010
+
+    await ClockCycles(dut.clk, 1)
+    await ReadOnly()
+
     assert dut.uo_out.value == 21
+    await NextTimeStep()
+
+    dut.ui_in.value = 255
+    dut.uio_in.value = 0b00000011
+
+    await ClockCycles(dut.clk, 1)
+    await ReadOnly()
+
+    assert dut.uo_out.value == 255
+    await NextTimeStep()
+
+    dut.uio_in.value = 0b00000010
+
+    await ClockCycles(dut.clk, 1)
+    await ReadOnly()
+
+    assert dut.uo_out.value == 0
+    await NextTimeStep()
 
     # Keep testing the module by changing the input values, waiting for
     # one or more clock cycles, and asserting the expected output values.
