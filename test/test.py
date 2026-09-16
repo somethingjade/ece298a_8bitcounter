@@ -30,6 +30,7 @@ async def test_project(dut):
 
     dut._log.info("===== Testing high impedance =====")
     dut.uio_in.value = 0b00000000
+    await ClockCycles(dut.clk, 1)
     await ReadOnly();
     assert dut.uo_out.value == "ZZZZZZZZ"
     dut._log.info(">>> High impedance PASS")
