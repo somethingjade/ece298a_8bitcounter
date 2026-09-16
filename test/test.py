@@ -25,43 +25,71 @@ async def test_project(dut):
 
     dut._log.info("Test project behavior")
 
-    # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 0b00000011
-    
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
-    await ReadOnly()
-
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 20
     await NextTimeStep()
+    dut._log.info("");
 
+    dut._log.info("===== Testing high impedance =====")
+    dut.uio_in.value = 0b00000000
+    await ReadOnly();
+    assert dut.uo_out.value == "ZZZZZZZZ"
+    dut._log.info(">>> High impedance PASS")
+
+    await NextTimeStep()
+    dut._log.info("");
+
+    dut._log.info("=== Testing reset ===");
+    dut.rst_n.value = 0;
     dut.uio_in.value = 0b00000010
-
-    await ClockCycles(dut.clk, 1)
     await ReadOnly()
+    assert dut.uo_out.value == 0
+    dut._log.info(">>> Reset PASS")
 
-    assert dut.uo_out.value == 21
     await NextTimeStep()
+    dut._log.info("");
 
-    dut.ui_in.value = 255
+    dut._log.info("=== Testing load ===");
+    dut.rst_n.value = 1;
     dut.uio_in.value = 0b00000011
-
+    dut.ui_in.value = 67
     await ClockCycles(dut.clk, 1)
     await ReadOnly()
+    assert dut.uo_out.value == 67
+    dut._log.info(">>> Load PASS")
 
+    await NextTimeStep()
+    dut._log.info("");
+
+    dut._log.info("=== Testing counter from 0-255 ===");
+    dut.uio_in.value = 0b00000010
+    for i in range(0, 256):
+        if i == 0:
+            dut.rst_n.value = 0;
+            await ClockCycles(dut.clk, 1)
+            await NextTimeStep()
+        if i == 0:
+            dut.rst_n.value = 1;
+        else:
+            await ClockCycles(dut.clk, 1)
+            await ReadOnly()
+        assert dut.uo_out.value == i
+        await NextTimeStep()
+    dut._log.info(">>> Counter 0-255 PASS")
+
+    await NextTimeStep()
+    dut._log.info("");
+
+    dut._log.info("=== Testing counter overflow behaviour ===");
+    dut.uio_in.value = 0b00000011
+    dut.ui_in.value = 255
+    await ClockCycles(dut.clk, 1)
+    await ReadOnly()
     assert dut.uo_out.value == 255
     await NextTimeStep()
-
     dut.uio_in.value = 0b00000010
-
     await ClockCycles(dut.clk, 1)
     await ReadOnly()
-
     assert dut.uo_out.value == 0
-    await NextTimeStep()
+    dut._log.info(">>> Counter overflow PASS")
 
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+    await NextTimeStep()
+    dut._log.info("");
