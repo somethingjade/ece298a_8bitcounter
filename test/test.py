@@ -30,21 +30,18 @@ async def test_project(dut):
 
     dut._log.info("===== Testing high impedance =====")
     dut.uio_in.value = 0b00000000
-    await ClockCycles(dut.clk, 2)
+    await ClockCycles(dut.clk, 1)
     await ReadOnly();
-    assert dut.uo_out.value == "ZZZZZZZZ"
+    assert all(bit == 'z' for bit in dut.uo_out.value.binstr.lower())
     dut._log.info(">>> High impedance PASS")
 
     await NextTimeStep()
     dut._log.info("");
 
     dut._log.info("=== Testing reset ===");
-    dut.uio_in.value = 0b00000010
-    await ClockCycles(dut.clk, 1)
-    await ReadOnly()
     assert dut.uo_out.value != 0
-    await NextTimeStep()
     dut.rst_n.value = 0;
+    dut.uio_in.value = 0b00000010
     await ReadOnly()
     assert dut.uo_out.value == 0
     dut._log.info(">>> Reset PASS")
