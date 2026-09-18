@@ -39,8 +39,12 @@ async def test_project(dut):
     dut._log.info("");
 
     dut._log.info("=== Testing reset ===");
-    dut.rst_n.value = 0;
     dut.uio_in.value = 0b00000010
+    await ClockCycles(dut.clk, 1)
+    await ReadOnly()
+    assert dut.uo_out.value != 0
+    await NextTimeStep()
+    dut.rst_n.value = 0;
     await ReadOnly()
     assert dut.uo_out.value == 0
     dut._log.info(">>> Reset PASS")
