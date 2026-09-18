@@ -9,9 +9,9 @@ async def load(dut, value, *, output_en = 1):
     for i in range(0, 8):
         dut.ui_in.value = 0b00000010 | (output_en << 3) | (((1 << i) & value) >> i)
         await ClockCycles(dut.clk, 1)
-        dut.ui_in.value = 0b00000100 | (output_en << 3)
-        await ClockCycles(dut.clk, 1)
-        dut.ui_in.value = 0b00000000 | (output_en << 3)
+    dut.ui_in.value = 0b00000100 | (output_en << 3)
+    await ClockCycles(dut.clk, 1)
+    dut.ui_in.value = 0b00000000 | (output_en << 3)
 
 
 @cocotb.test()
