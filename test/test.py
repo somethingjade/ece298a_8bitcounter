@@ -5,6 +5,14 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, ReadOnly, NextTimeStep
 
+async def load(dut, value, *, output_en = 1):
+    for i in range(0, 8):
+        dut.ui_in.value = 0b00000010 | (output_en << 3) | (((1 << i) & value) >> i)
+        await ClockCycles(dut.clk, 1)
+        dut.ui_in.value = 0b00000100 | (output_en << 3)
+        await ClockCycles(dut.clk, 1)
+        dut.ui_in.value = 0b00000000 | (output_en << 3)
+
 
 @cocotb.test()
 async def test_project(dut):
@@ -33,7 +41,7 @@ async def test_project(dut):
     await ClockCycles(dut.clk, 1)
     await ReadOnly();
     # assert all(bit == 'z' for bit in dut.uo_out.value.binstr.lower())
-    assert dut.uio_out.value == "ZZZZZZZZ"
+    assert dut.uio_pad.value == "ZZZZZZZZ"
     dut._log.info(">>> High impedance PASS")
 
     await NextTimeStep()
@@ -43,10 +51,11 @@ async def test_project(dut):
     dut.ui_in.value = 0b00001000
     await ClockCycles(dut.clk, 1)
     await ReadOnly();
-    assert dut.uio_out.value != 0
+    assert dut.uio_pad.value != 0
+    await NextTimeStep()
     dut.rst_n.value = 0;
     await ReadOnly()
-    assert dut.uio_out.value == 0
+    assert dut.uio_pad.value == 0
     dut._log.info(">>> Reset PASS")
 
     await NextTimeStep()
@@ -54,13 +63,9 @@ async def test_project(dut):
 
     dut._log.info("=== Testing load ===");
     dut.rst_n.value = 1;
-    for i in range(0, 8):
-        dut.ui_in.value = 0b00001010 | (((1 << i) & 67) >> i)
-        await ClockCycles(dut.clk, 1)
-    dut.ui_in.value = 0b00001100
-    await ClockCycles(dut.clk, 1)
+    await load(dut, 67)
     await ReadOnly();
-    assert dut.uio_out.value == 67
+    assert dut.uio_pad.value == 67
     dut._log.info(">>> Load PASS")
 
     await NextTimeStep()
@@ -78,25 +83,22 @@ async def test_project(dut):
         else:
             await ClockCycles(dut.clk, 1)
             await ReadOnly()
-        assert dut.uio_out.value == i
+        assert dut.uio_pad.value == i
         await NextTimeStep()
     dut._log.info(">>> Counter 0-255 PASS")
 
     await NextTimeStep()
     dut._log.info("");
 
-    # dut._log.info("=== Testing counter overflow behaviour ===");
-    # dut.uio_in.value = 0b00000011
-    # dut.ui_in.value = 255
-    # await ClockCycles(dut.clk, 1)
-    # await ReadOnly()
-    # assert dut.uo_out.value == 255
-    # await NextTimeStep()
-    # dut.uio_in.value = 0b00000010
-    # await ClockCycles(dut.clk, 1)
-    # await ReadOnly()
-    # assert dut.uo_out.value == 0
-    # dut._log.info(">>> Counter overflow PASS")
+    dut._log.info("=== Testing counter overflow behaviour ===");
+    await load(dut, 255)
+    await ReadOnly()
+    assert dut.uio_pad.value == 255
+    await NextTimeStep()
+    await ClockCycles(dut.clk, 1)
+    await ReadOnly()
+    assert dut.uio_pad.value == 0
+    dut._log.info(">>> Counter overflow PASS")
 
     # await NextTimeStep()
     # dut._log.info("");
