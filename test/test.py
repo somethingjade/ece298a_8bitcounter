@@ -3,7 +3,7 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, ReadOnly, NextTimeStep
+from cocotb.triggers import ClockCycles, FallingEdge, ReadOnly, NextTimeStep, RisingEdge
 
 async def load(dut, value, *, output_en = 1):
     await ClockCycles(dut.clk, 1)
@@ -51,15 +51,19 @@ async def test_project(dut):
     dut._log.info("");
 
     dut._log.info("=== Testing reset ===");
+    await RisingEdge(dut.clk)
     dut.ui_in.value = 0b00001000
     await ClockCycles(dut.clk, 1)
     await ReadOnly();
     assert dut.uio_pad.value != 0
     await NextTimeStep()
+    await FallingEdge(dut.clk)
     dut.rst_n.value = 0;
     await ReadOnly()
     assert dut.uio_pad.value == 0
     dut._log.info(">>> Reset PASS")
+
+    await ClockCycles(dut.clk, 1)
 
     await NextTimeStep()
     dut._log.info("");
@@ -75,6 +79,7 @@ async def test_project(dut):
     dut._log.info("");
 
     dut._log.info("=== Testing counter from 0-255 ===");
+    await ClockCycles(dut.clk, 1)
     dut.ui_in.value = 0b00001000
     for i in range(0, 256):
         if i == 0:
