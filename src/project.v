@@ -17,22 +17,21 @@ module tt_um_example (
 );
 
 	reg [7:0] count;
+	reg [7:0] out;
 	// uio_in[0] is load
 	// uio_in[1] is output_en
 
 	always @(posedge clk or negedge rst_n) begin
-		if (uio_in[1])
-			if (!rst_n)
-				count <= 0;
-			else if (uio_in[0])
-				count <= ui_in;
-			else
-				count <= count + 1;
+		if (!rst_n)
+			count <= 0;
+		else if (uio_in[0])
+			count <= ui_in;
 		else
-			count <= 8'bz;
+			count <= count + 1;
+		out <= uio_in[1] ? count : 8'bz;
 	end
 
-	assign uo_out = count;
+	assign uo_out = out;
 
 	// All output pins must be assigned. If not used, assign to 0.
 	// assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
