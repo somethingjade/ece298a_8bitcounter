@@ -32,8 +32,8 @@ module tt_um_example (
 				shift <= {ui_in[0], shift[7:1]};
 			if (ui_in[2])
 				count <= shift;
-			// else
-			// 	count <= count + 1;
+			else
+				count <= count + 1;
 		end
 	end
 

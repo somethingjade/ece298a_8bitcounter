@@ -6,6 +6,7 @@ from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, ReadOnly, NextTimeStep
 
 async def load(dut, value, *, output_en = 1):
+    await ClockCycles(dut.clk, 1)
     for i in range(0, 8):
         dut.ui_in.value = 0b00000010 | (output_en << 3) | (((1 << i) & value) >> i)
         await ClockCycles(dut.clk, 1)
@@ -47,19 +48,19 @@ async def test_project(dut):
     await NextTimeStep()
     dut._log.info("");
 
-    # dut._log.info("=== Testing reset ===");
-    # dut.ui_in.value = 0b00001000
-    # await ClockCycles(dut.clk, 1)
-    # await ReadOnly();
-    # assert dut.uio_pad.value != 0
-    # await NextTimeStep()
-    # dut.rst_n.value = 0;
-    # await ReadOnly()
-    # assert dut.uio_pad.value == 0
-    # dut._log.info(">>> Reset PASS")
-    #
-    # await NextTimeStep()
-    # dut._log.info("");
+    dut._log.info("=== Testing reset ===");
+    dut.ui_in.value = 0b00001000
+    await ClockCycles(dut.clk, 1)
+    await ReadOnly();
+    assert dut.uio_pad.value != 0
+    await NextTimeStep()
+    dut.rst_n.value = 0;
+    await ReadOnly()
+    assert dut.uio_pad.value == 0
+    dut._log.info(">>> Reset PASS")
+
+    await NextTimeStep()
+    dut._log.info("");
 
     dut._log.info("=== Testing load ===");
     dut.rst_n.value = 1;
