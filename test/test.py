@@ -45,6 +45,8 @@ async def test_project(dut):
     assert dut.uio_pad.value == "ZZZZZZZZ"
     dut._log.info(">>> High impedance PASS")
 
+    await ClockCycles(dut.clk, 10)
+
     await NextTimeStep()
     dut._log.info("");
 
