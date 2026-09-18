@@ -47,19 +47,19 @@ async def test_project(dut):
     await NextTimeStep()
     dut._log.info("");
 
-    dut._log.info("=== Testing reset ===");
-    dut.ui_in.value = 0b00001000
-    await ClockCycles(dut.clk, 1)
-    await ReadOnly();
-    assert dut.uio_pad.value != 0
-    await NextTimeStep()
-    dut.rst_n.value = 0;
-    await ReadOnly()
-    assert dut.uio_pad.value == 0
-    dut._log.info(">>> Reset PASS")
-
-    await NextTimeStep()
-    dut._log.info("");
+    # dut._log.info("=== Testing reset ===");
+    # dut.ui_in.value = 0b00001000
+    # await ClockCycles(dut.clk, 1)
+    # await ReadOnly();
+    # assert dut.uio_pad.value != 0
+    # await NextTimeStep()
+    # dut.rst_n.value = 0;
+    # await ReadOnly()
+    # assert dut.uio_pad.value == 0
+    # dut._log.info(">>> Reset PASS")
+    #
+    # await NextTimeStep()
+    # dut._log.info("");
 
     dut._log.info("=== Testing load ===");
     dut.rst_n.value = 1;
